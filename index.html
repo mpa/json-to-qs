@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>JSON to Query String Converter</title>
+	<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>-->
+	<script>
+		(function(window){
+			var convert,
+				regexpLeftBracket = /%5b/gi,
+				regexpRightBracket = /%5d/gi;
+				
+			convert = function($destination) {
+				return function() {
+					var parsed, keyValues, keyValue;
+					
+					try {
+						parsed = $.param($.parseJSON($(this).val()));
+						$(this).removeClass('parse-error');
+					}
+					catch(e) {
+						$(this).addClass('parse-error');
+					}
+					finally {
+						if(parsed)
+						{
+							keyValues = parsed.split('&');
+							for(i = 0, l = keyValues.length; i<l; i++)
+							{
+								keyValue = keyValues[i].split('=');
+								keyValue[0]=keyValue[0].replace(regexpLeftBracket, '[').replace(regexpRightBracket, ']');
+								keyValues[i] = keyValue.join('=');
+							}
+							$destination.val(keyValues.join('&'));
+						}
+					}
+				}
+			}
+			
+			window.Converter = function(){
+				var $qs = $('#qs textarea');
+				
+				$('#json textarea').on('input', convert($qs)).focus();
+				
+				$qs.on('click', function(){
+					this.select();
+					return false;
+				});
+			};
+		})(window);
+		
+		$(function(){
+			Converter();
+		});
+	</script>
+	<style>
+		body {
+			font-family: 'Helvetica Neue', Helvetica, Arial, Sans-serif;
+			padding: 0 30px 30px;
+			margin: 0;
+			background: #f4fbff;
+			color: #032d3a;
+		}
+		h1 {
+			font-size: 48px;
+			text-align: center;
+			font-family: 'Optima';
+			font-weight: 100;
+		}
+		h2 {
+			font-size: 14px;
+			font-weight: bold;
+			text-align: center;
+		}
+		textarea {
+			padding: 10px;
+			font-family: Monaco, Monospace;
+			font-size: 16px;
+			position: absolute;
+			top: 35px; left: 0; right: 0; bottom: 0;
+			border: none;
+			outline: none;
+			background: #0e56e9;
+			color: #fff;
+			-moz-border-radius: 5px;
+			-webkit-border-radius: 5px;
+			border-radius: 5px;
+		}
+		#json,
+		#qs {
+			position: absolute;
+			top: 110px;
+			bottom: 30px;
+			left: 30px;
+			right: 50%;
+		}
+		
+		#json textarea {
+			right: 10px;
+		}
+			#json textarea.parse-error{
+				background: #ff4a4a;
+			}
+		#qs {
+			left: 50%;
+			right: 30px;
+		}
+			#qs textarea{
+				background: #6b99f6;
+			}
+		@media screen and (max-width: 500px) {
+			#json, 
+			#qs {
+				position: relative;
+				display: block;
+				top: 0; left: 0; right: 0; bottom: 0;
+			}
+			#json textarea, 
+			#qs textarea {
+				top: 0; left: 0; right: 0; bottom: 0;
+				display: block;
+				position: relative;
+				height: 170px;
+				width: 100%;
+				margin-left: -10px;
+			}
+		}
+	</style>
+</head>
+<body>
+	<h1>JSON to Query&nbsp;String</h1>
+	
+	<div id="json">
+		<h2>JSON:</h2>
+		<textarea></textarea>
+	</div>
+	<div id="qs">
+		<h2>Query string:</h2>
+		<textarea readonly></textarea>
+	</div>
+</body>
+</html>
